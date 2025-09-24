@@ -23,7 +23,7 @@ jobs:
                  -t 00:10:00 -c copy "fox_capture_$timestamp.mp4"
 
       - name: Upload FOX Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fox_capture
           path: fox_capture_*.mp4
