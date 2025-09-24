@@ -19,8 +19,8 @@ jobs:
           ffmpeg -headers "User-Agent: VLC/3.0.11" \
                  -headers "Referer: https://www.fox.com/" \
                  -headers "Origin: https://www.fox.com/" \
-                 -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/whizdt2-ue2/index_7.m3u8?zipcode=55344" \
-                 -t 00:10:00 -c copy "fox_capture_$timestamp.mp4"
+                 -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvnsdt2-ue2/index_7.m3u8?zipcode=70533" \
+                 -t 00:55:00 -c copy "fox_capture_$timestamp.mp4"
 
       - name: Upload FOX Artifact
         uses: actions/upload-artifact@v4
