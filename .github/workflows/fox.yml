@@ -10,7 +10,7 @@ jobs:
   record_fox:
     name: 🟠 FOX Ritual
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 13  # GitHub kills job after 13 minutes
 
     steps:
       - name: Install ffmpeg
@@ -20,10 +20,9 @@ jobs:
         run: |
           timestamp=$(date +%Y%m%d_%H%M%S)
           echo "🟠 FOX recording started at $(date)"
-          timeout 3600 ffmpeg -headers "User-Agent: VLC/3.0.11" \
-                 -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_7.m3u8?zipcode=55344
-" \
-                 -t 3500 -c copy "fox_capture_$timestamp.mp4" || echo "❌ FOX stream capture failed—symbolic denial logged."
+          timeout 630 ffmpeg -headers "User-Agent: VLC/3.0.11" \
+                 -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_7.m3u8?zipcode=55344" \
+                 -t 600 -c copy "fox_capture_${timestamp}_55344.mp4" || echo "❌ FOX stream capture failed—symbolic denial logged."
           echo "📁 FOX recording ended at $(date)"
 
       - name: Upload FOX Artifact
