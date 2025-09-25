@@ -15,6 +15,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
+    timeout-minutes: 360  # ⏱️ Ritual override: full 6-hour invocation
     steps:
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
