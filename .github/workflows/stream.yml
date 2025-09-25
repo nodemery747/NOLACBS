@@ -34,14 +34,14 @@ jobs:
           echo "🎙️ Invoking stream ritual for $TARGET at $(date)"
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 1 hour 38 minutes..."
-            timeout 5880 ffmpeg -nostdin \
+            echo "📡 Recording WVUE stream for 1 hour 35 minutes..."
+            timeout 5700 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_3.m3u8?zipcode=70130" \
-              -t 01:38:00 -c copy "wvue_capture_${timestamp}.mp4" || {
+              -t 01:35:00 -c copy "wvue_capture_${timestamp}.mp4" || {
                 echo "❌ WVUE stream failed. No fallback invoked."
                 exit 1
               }
