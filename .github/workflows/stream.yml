@@ -52,7 +52,7 @@ jobs:
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -loglevel debug \
               -i "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/2215/5743360/media.m3u8?request_token=k9y5OJyyoKM4lgG2CElDD0XwgvHI7jQcTqGOqFzbmMg9E4PCRGjHaMuUR95agyYMjUNWfdfIQVkYtah1RPiyEr4TUcxXTYKZbwlH_56_9csrXTvTrXU9hutu3_nzr6MVqMq_rVtl6XWiBdPrz2bOFRsqyqorAJniRjXaQWEaZI0m_phU0iS5J8sM6Qg&CMCD=mtp%3D91200%2Cot%3Dm%2Csf%3Dh%2Csid%3D%2230861c01-87bf-4743-a492-6fa4b5c100c1%22" \
-              -t 00:52:00 -c copy "kgwn_capture_${timestamp}.mp4" || {
+              -t 00:52:00 -c copy "wwl_capture_${timestamp}.mp4" || {
                 echo "❌ WWL stream failed. No fallback invoked."
                 exit 1
               }
