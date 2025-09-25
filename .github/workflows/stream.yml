@@ -34,7 +34,7 @@ jobs:
             ffmpeg -headers "User-Agent: VLC/3.0.11" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
-              -i "https://cf.edge.foxdtc.digitalvideoplatform.com/7cfb2bd9070e494c55df469b3a585061de9a9efe.20250925111154/live-dr/wvue-uw2/index_2.m3u8?zipcode=70130" \
+              -i "https://cf.edge.foxdtc.digitalvideoplatform.com/5410d4705b09ccb37618bef02f79559fd6d4bb05.20250925212725/live-dr/wvue-uw2/index_2.m3u8?zipcode=7051070130" \
               -t 00:75:00 -c copy "wvue_capture_${timestamp}.mp4"
 
           elif [[ "$TARGET" == "wwl" ]]; then
