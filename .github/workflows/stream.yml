@@ -26,7 +26,7 @@ jobs:
           if [[ "${{ github.event.inputs.target }}" == "wvue" ]]; then
             echo "Recording WVUE stream..."
             ffmpeg -headers "User-Agent: VLC/3.0.11" \
-              -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_7.m3u8?zipcode=55344" \
+              -i "https://cf.edge.foxdtc.digitalvideoplatform.com/7cfb2bd9070e494c55df469b3a585061de9a9efe.20250925111154/live-dr/wvue-uw2/index_2.m3u8?zipcode=70130" \
               -t 00:46:00 -c copy "wvue_capture_${timestamp}.mp4"
 
           elif [[ "${{ github.event.inputs.target }}" == "wwl" ]]; then
