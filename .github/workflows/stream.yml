@@ -26,6 +26,8 @@ jobs:
           if [[ "${{ github.event.inputs.target }}" == "wvue" ]]; then
             echo "Recording WVUE stream..."
             ffmpeg -headers "User-Agent: VLC/3.0.11" \
+              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+              -fflags +genpts -timeout 3000000 \
               -i "https://cf.edge.foxdtc.digitalvideoplatform.com/7cfb2bd9070e494c55df469b3a585061de9a9efe.20250925111154/live-dr/wvue-uw2/index_2.m3u8?zipcode=70130" \
               -t 00:46:00 -c copy "wvue_capture_${timestamp}.mp4"
 
@@ -43,7 +45,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: stream_capture
+          name: ${{ github.event.inputs.target }}_capture
           path: |
             wvue_capture_*.mp4
             wwl_capture_*.mp4
