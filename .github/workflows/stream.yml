@@ -40,7 +40,7 @@ jobs:
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
-              -i "https://foxdtc-video.akamaized.net/live-dr/kadn-ue2/hdntl=exp=1758918524~acl=%2f*~data=hdntl~hmac=9c706d35acb18deae9268cc93069c0bb212bf08d07ed23402619d2cedae94ba0/index_2.m3u8?zipcode=70130" \
+              -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_3.m3u8?zipcode=70130" \
               -t 01:38:00 -c copy "wvue_capture_${timestamp}.mp4" || {
                 echo "❌ WVUE stream failed. No fallback invoked."
                 exit 1
