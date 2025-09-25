@@ -35,13 +35,13 @@ jobs:
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -i "https://cf.edge.foxdtc.digitalvideoplatform.com/7cfb2bd9070e494c55df469b3a585061de9a9efe.20250925111154/live-dr/wvue-uw2/index_2.m3u8?zipcode=70130" \
-              -t 00:46:00 -c copy "wvue_capture_${timestamp}.mp4"
+              -t 00:75:00 -c copy "wvue_capture_${timestamp}.mp4"
 
           elif [[ "$TARGET" == "wwl" ]]; then
             echo "Recording WWL (CBS) stream..."
             ffmpeg -headers "User-Agent: VLC/3.0.11" \
               -i "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22" \
-              -t 00:46:00 -c copy "wwl_capture_${timestamp}.mp4"
+              -t 00:57:00 -c copy "wwl_capture_${timestamp}.mp4"
 
           else
             echo "Invalid stream selection: $TARGET"
