@@ -1,4 +1,4 @@
-name: Stream Ritual
+name: Stream Ritual – WVUE
 
 on:
   workflow_dispatch:
@@ -9,21 +9,23 @@ on:
 jobs:
   restore:
     runs-on: ubuntu-latest
-    timeout-minutes: 50  # Explicitly set GitHub's ceiling
 
     steps:
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Record CBS Stream
+      - name: Record WVUE Stream
         run: |
           timestamp=$(date +%Y%m%d_%H%M%S)
           ffmpeg -headers "User-Agent: VLC/3.0.11" \
-                 -i "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22" \
-                 -t 00:45:00 -c copy "cbs_capture_$timestamp.mp4"
+                 -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_7.m3u8?zipcode=55344" \
+                 -t 00:46:00 -c copy "wvue_capture_$timestamp.mp4"
 
-      - name: Upload CBS Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload WVUE Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: cbs_capture
-          path: cbs_capture_*.mp4
+          name: wvue_capture
+          path: wvue_capture_*.mp4
+
+      - name: Confirm Completion
+        run: echo "$(date): WVUE stream captured and uploaded."
