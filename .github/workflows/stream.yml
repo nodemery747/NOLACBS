@@ -16,57 +16,72 @@ jobs:
   record:
     runs-on: ubuntu-latest
     timeout-minutes: 360  # ⏱️ Ritual override: full 6-hour invocation
+
     steps:
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Clean workspace
-        run: rm -f wvue_capture_*.mp4 wwl_capture_*.mp4
+      - name: Purge Runner Cache
+        run: |
+          echo "🧹 Clearing workspace and temp cache at $(date)"
+          rm -rf ${{ github.workspace }}/*
+          sudo rm -rf /tmp/*
+
+      - name: Clean Workspace Artifacts
+        run: rm -f wvue_capture_*.mp4 wwl_capture_*.mp4 fallback_capture_*.mp4
 
       - name: Record Selected Stream
         env:
           TARGET: ${{ github.event.inputs.target }}
         run: |
           timestamp=$(date +%Y%m%d_%H%M%S)
-          echo "Invoking stream ritual for $TARGET with 360-minute window at $(date)"
+          echo "🎙️ Invoking stream ritual for $TARGET with 360-minute window at $(date)"
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "Recording WVUE stream..."
+            echo "📡 Recording WVUE stream..."
             ffmpeg -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
-              -i "https://cf.edge.foxdtc.digitalvideoplatform.com/5410d4705b09ccb37618bef02f79559fd6d4bb05.20250925212725/live-dr/wvue-uw2/index_2.m3u8?zipcode=70130" \
-              -c copy "wvue_capture_${timestamp}.mp4" &
-            pid=$!
+              -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_7.m3u8?zipcode=55344" \
+              -c copy "wvue_capture_${timestamp}.mp4" || {
+                echo "⚠️ WVUE stream failed—invoking fallback stream..."
+                ffmpeg -headers "User-Agent: VLC/3.0.11" \
+                  -i "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" \
+                  -c copy "fallback_capture_${timestamp}.mp4"
+              }
 
           elif [[ "$TARGET" == "wwl" ]]; then
-            echo "Recording WWL (CBS) stream..."
+            echo "📡 Recording WWL (CBS) stream..."
             ffmpeg -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -loglevel debug \
               -i "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22" \
-              -c copy "wwl_capture_${timestamp}.mp4" &
-            pid=$!
+              -c copy "wwl_capture_${timestamp}.mp4" || {
+                echo "⚠️ WWL stream failed—invoking fallback stream..."
+                ffmpeg -headers "User-Agent: VLC/3.0.11" \
+                  -i "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" \
+                  -c copy "fallback_capture_${timestamp}.mp4"
+              }
 
           else
-            echo "Invalid stream selection: $TARGET"
+            echo "❌ Invalid stream selection: $TARGET"
             exit 1
           fi
 
           # ⏳ Ritual timestamp logging every 30 minutes
           for i in {1..12}; do
             sleep 1800
-            echo "Checkpoint $(($i * 30)) minutes elapsed at $(date)"
+            echo "⏱️ Checkpoint $(($i * 30)) minutes elapsed at $(date)"
           done
-
-          # Wait for ffmpeg to finish
-          wait $pid
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.inputs.target }}_capture
-          path: ${{ github.event.inputs.target }}_capture_*.mp4
+          path: |
+            wvue_capture_*.mp4
+            wwl_capture_*.mp4
+            fallback_capture_*.mp4
 
       - name: Confirm Completion
-        run: echo "Stream capture complete at $(date)"
+        run: echo "✅ Stream capture complete at $(date)"
