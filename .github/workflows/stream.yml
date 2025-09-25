@@ -26,4 +26,4 @@ jobs:
           path: wvue_capture_*.mp4
 
       - name: Confirm Completion
-        run: echo "$(date): WVUE stream captured and uploaded."
+        run: echo "WVUE stream captured and uploaded at $(date)"
