@@ -34,25 +34,25 @@ jobs:
           echo "🎙️ Invoking stream ritual for $TARGET at $(date)"
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 2 hours..."
-            timeout 7200 ffmpeg -nostdin \
+            echo "📡 Recording WVUE stream for 3 hours and 15 minutes..."
+            timeout 11700 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "https://cf.edge.foxdtc.digitalvideoplatform.com/71dba187bf4dae369673d7eb9be859d7e47ad317.20250907220407/live-dr/wvue-ue2/index_1.m3u8?zipcode=70130" \
-              -t 02:00:00 -c copy "wvue_capture_${timestamp}.mp4" || {
+              -t 03:15:00 -c copy "wvue_capture_${timestamp}.mp4" || {
                 echo "❌ WVUE stream failed. No fallback invoked."
                 exit 1
               }
 
           elif [[ "$TARGET" == "wwl" ]]; then
-            echo "📡 Recording WWL (CBS) stream for 52 minutes..."
-            timeout 3120 ffmpeg -nostdin \
+            echo "📡 Recording WWL (CBS) stream for 3 hours and 15 minutes..."
+            timeout 11700 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -loglevel debug \
               -i "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22" \
-              -t 00:52:00 -c copy "wwl_capture_${timestamp}.mp4" || {
+              -t 03:15:00 -c copy "wwl_capture_${timestamp}.mp4" || {
                 echo "❌ WWL stream failed. No fallback invoked."
                 exit 1
               }
