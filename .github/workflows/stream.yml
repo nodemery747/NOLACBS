@@ -15,7 +15,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # ⏱️ Ritual window: 10 minutes max
+    timeout-minutes: 45  # ⏱️ Ritual window: 45 minutes max
 
     steps:
       - name: Install ffmpeg
@@ -33,25 +33,25 @@ jobs:
           echo "🎙️ Invoking stream ritual for $TARGET at $(date)"
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 5 minutes..."
-            timeout 360 ffmpeg -nostdin \
+            echo "📡 Recording WVUE stream for 40 minutes..."
+            timeout 2400 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 00:05:00 -c copy "WVUE.mp4" || {
+              -t 00:40:00 -c copy "WVUE.mp4" || {
                 echo "❌ WVUE stream failed. No fallback invoked."
                 exit 1
               }
 
           elif [[ "$TARGET" == "wwl" ]]; then
-            echo "📡 Recording WWL (CBS) stream for 5 minutes..."
-            timeout 360 ffmpeg -nostdin \
+            echo "📡 Recording WWL (CBS) stream for 40 minutes..."
+            timeout 2400 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -loglevel debug \
               -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 00:05:00 -c copy "WWL.mp4" || {
+              -t 00:40:00 -c copy "WWL.mp4" || {
                 echo "❌ WWL stream failed. No fallback invoked."
                 exit 1
               }
