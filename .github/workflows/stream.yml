@@ -15,7 +15,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # ⏱️ Ritual window: 6 hours max
+    timeout-minutes: 30  # ⏱️ Ritual window: 30 minutes max
 
     steps:
       - name: Install ffmpeg
@@ -30,29 +30,28 @@ jobs:
         env:
           TARGET: ${{ github.event.inputs.target }}
         run: |
-          timestamp=$(date +%Y%m%d_%H%M%S)
           echo "🎙️ Invoking stream ritual for $TARGET at $(date)"
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 3 hours and 15 minutes..."
-            timeout 11700 ffmpeg -nostdin \
+            echo "📡 Recording WVUE stream for 10 minutes..."
+            timeout 600 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 03:15:00 -c copy "wvue_capture_${timestamp}.mp4" || {
+              -t 00:10:00 -c copy "WVUE.mp4" || {
                 echo "❌ WVUE stream failed. No fallback invoked."
                 exit 1
               }
 
           elif [[ "$TARGET" == "wwl" ]]; then
-            echo "📡 Recording WWL (CBS) stream for 3 hours and 15 minutes..."
-            timeout 11700 ffmpeg -nostdin \
+            echo "📡 Recording WWL (CBS) stream for 10 minutes..."
+            timeout 600 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -loglevel debug \
               -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 03:15:00 -c copy "wwl_capture_${timestamp}.mp4" || {
+              -t 00:10:00 -c copy "WWL.mp4" || {
                 echo "❌ WWL stream failed. No fallback invoked."
                 exit 1
               }
@@ -83,15 +82,15 @@ jobs:
         if: always() && github.event.inputs.target == 'wvue'
         uses: actions/upload-artifact@v4
         with:
-          name: wvue_capture_${{ github.run_id }}
-          path: wvue_capture_*.mp4
+          name: WVUE_${{ github.run_id }}
+          path: WVUE.mp4
 
       - name: Upload WWL Artifact
         if: always() && github.event.inputs.target == 'wwl'
         uses: actions/upload-artifact@v4
         with:
-          name: wwl_capture_${{ github.run_id }}
-          path: wwl_capture_*.mp4
+          name: WWL_${{ github.run_id }}
+          path: WWL.mp4
 
       - name: Confirm Completion
         run: echo "✅ Stream ritual complete at $(date)"
