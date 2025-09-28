@@ -17,7 +17,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 200  # ⏱️ Max buffer for Saints ritual
+    timeout-minutes: 200
 
     steps:
       - name: Install ffmpeg
@@ -37,8 +37,6 @@ jobs:
 
           if [[ "$TARGET" == "wvue" ]]; then
             echo "📡 Recording WVUE stream for 40 minutes..."
-            echo "🕰️ Duration: 00:40:00"
-            echo "📁 File name: WVUE.mp4"
             timeout 2400 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
@@ -52,8 +50,6 @@ jobs:
 
           elif [[ "$TARGET" == "wwl" ]]; then
             echo "📡 Recording WWL stream for 40 minutes..."
-            echo "🕰️ Duration: 00:40:00"
-            echo "📁 File name: WWL.mp4"
             timeout 2400 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
@@ -67,8 +63,6 @@ jobs:
 
           elif [[ "$TARGET" == "saints wvue" ]]; then
             echo "🏈 Recording Saints stream via WVUE for 3 hours 15 minutes..."
-            echo "🕰️ Duration: 03:15:00"
-            echo "📁 File name: SAINTS_WVUE.mp4"
             timeout 11700 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
@@ -82,8 +76,6 @@ jobs:
 
           elif [[ "$TARGET" == "saints wwl" ]]; then
             echo "🏈 Recording Saints stream via WWL for 3 hours 15 minutes..."
-            echo "🕰️ Duration: 03:15:00"
-            echo "📁 File name: SAINTS_WWL.mp4"
             timeout 11700 ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
