@@ -1,23 +1,137 @@
-Manually triggered now
-@nodemery747nodemery747
-⁠
- bf04bd9
-main
-Status
-Failure
-Total duration
-9s
-Artifacts
-–
+name: Saints Recording Ritual
 
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Select stream target"
+        required: true
+        type: choice
+        options:
+          - wvue
+          - wwl
+          - saints-wvue
+          - saints-wwl
 
-Annotations
-1 error and 3 warnings
-record
-Process completed with exit code 127.
-record
-No files were found with the provided path: Saints_wvue_TOO_BIG.mp4. No artifacts will be uploaded.
-record
-No files were found with the provided path: Saints_wvue.mp4. No artifacts will be uploaded.
-record
-No files were found with the provided path: RECORD_TIMESTAMP.txt. No artifacts will be uploaded.
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Record Selected Stream
+        run: |
+          echo "🎙️ Invoking stream ritual for ${{ github.event.inputs.target }} at $(date)"
+          TARGET="${{ github.event.inputs.target }}"
+
+          case "$TARGET" in
+            wvue)
+              OUTPUT="WVUE.mp4"
+              URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=YOUR_SECRET_TOKEN"
+              DURATION="00:40:00" ;;
+            wwl)
+              OUTPUT="WWL.mp4"
+              URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=YOUR_SECRET_TOKEN"
+              DURATION="00:40:00" ;;
+            saints-wvue)
+              OUTPUT="Saints_wvue.mp4"
+              URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=YOUR_SECRET_TOKEN"
+              DURATION="03:15:00" ;;
+            saints-wwl)
+              OUTPUT="Saints_wwl.mp4"
+              URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=YOUR_SECRET_TOKEN"
+              DURATION="03:15:00" ;;
+            *)
+              echo "❌ Invalid stream selection: $TARGET"
+              exit 1 ;;
+          esac
+
+          echo "📡 Recording $OUTPUT for $DURATION..."
+          ffmpeg -nostdin -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+            -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+            -fflags +genpts -timeout 3000000 -loglevel debug \
+            -i "$URL" -t "$DURATION" -c copy "$OUTPUT"
+
+          echo "🎬 ffmpeg exited with code $?"
+
+          if [ ! -f "$OUTPUT" ]; then
+            echo "⚠️ $OUTPUT not found. Creating empty placeholder."
+            touch "$OUTPUT"
+          fi
+
+          size=$(du -m "$OUTPUT" | cut -f1)
+          echo "📦 $OUTPUT size: $size MB"
+
+          if [ "$size" -gt 2048 ]; then
+            echo "⚠️ $OUTPUT exceeds 2GB. Renaming to prevent upload."
+            mv "$OUTPUT" "${OUTPUT%.mp4}_TOO_BIG.mp4"
+          fi
+
+          date > RECORD_TIMESTAMP.txt
+
+      - name: Upload Timestamp
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: RECORD_TIMESTAMP_${{ github.run_id }}
+          path: RECORD_TIMESTAMP.txt
+
+      - name: Upload WVUE Artifact
+        if: always() && github.event.inputs.target == 'wvue'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WVUE_${{ github.run_id }}
+          path: WVUE.mp4
+
+      - name: Upload WWL Artifact
+        if: always() && github.event.inputs.target == 'wwl'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WWL_${{ github.run_id }}
+          path: WWL.mp4
+
+      - name: Upload Saints WVUE Artifact
+        if: always() && github.event.inputs.target == 'saints-wvue'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Saints_wvue_${{ github.run_id }}
+          path: Saints_wvue.mp4
+
+      - name: Upload Saints WWL Artifact
+        if: always() && github.event.inputs.target == 'saints-wwl'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Saints_wwl_${{ github.run_id }}
+          path: Saints_wwl.mp4
+
+      - name: Upload WVUE Oversized Artifact
+        if: always() && github.event.inputs.target == 'wvue'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WVUE_TOO_BIG_${{ github.run_id }}
+          path: WVUE_TOO_BIG.mp4
+
+      - name: Upload WWL Oversized Artifact
+        if: always() && github.event.inputs.target == 'wwl'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WWL_TOO_BIG_${{ github.run_id }}
+          path: WWL_TOO_BIG.mp4
+
+      - name: Upload Saints WVUE Oversized Artifact
+        if: always() && github.event.inputs.target == 'saints-wvue'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Saints_wvue_TOO_BIG_${{ github.run_id }}
+          path: Saints_wvue_TOO_BIG.mp4
+
+      - name: Upload Saints WWL Oversized Artifact
+        if: always() && github.event.inputs.target == 'saints-wwl'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Saints_wwl_TOO_BIG_${{ github.run_id }}
+          path: Saints_wwl_TOO_BIG.mp4
