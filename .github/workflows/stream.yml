@@ -17,7 +17,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 200
+    timeout-minutes: 360  # ⏱️ Full 6-hour buffer for extended Saints rituals
 
     steps:
       - name: Install ffmpeg
