@@ -1,4 +1,4 @@
-name: Stream Ritual – WVUE, WWL, or Saints
+name: Stream Ritual – WVUE or WWL (Short Form Only)
 
 on:
   workflow_dispatch:
@@ -11,13 +11,11 @@ on:
         options:
           - wvue
           - wwl
-          - saints wvue
-          - saints wwl
 
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 200
+    timeout-minutes: 60  # ⏱️ Enough buffer for 40-minute ritual
 
     steps:
       - name: Install ffmpeg
@@ -61,32 +59,6 @@ jobs:
                 exit 1
               }
 
-          elif [[ "$TARGET" == "saints wvue" ]]; then
-            echo "🏈 Recording Saints stream via WVUE for 3 hours 15 minutes..."
-            timeout 11700 ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -loglevel debug \
-              -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 03:15:00 -c copy "SAINTS_WVUE.mp4" || {
-                echo "❌ Saints WVUE stream failed."
-                exit 1
-              }
-
-          elif [[ "$TARGET" == "saints wwl" ]]; then
-            echo "🏈 Recording Saints stream via WWL for 3 hours 15 minutes..."
-            timeout 11700 ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -loglevel debug \
-              -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 03:15:00 -c copy "SAINTS_WWL.mp4" || {
-                echo "❌ Saints WWL stream failed."
-                exit 1
-              }
-
           else
             echo "❌ Invalid stream selection: $TARGET"
             exit 1
@@ -123,20 +95,6 @@ jobs:
         with:
           name: WWL_${{ github.run_id }}
           path: WWL.mp4
-
-      - name: Upload Saints WVUE Artifact
-        if: always() && github.event.inputs.target == 'saints wvue'
-        uses: actions/upload-artifact@v4
-        with:
-          name: SAINTS_WVUE_${{ github.run_id }}
-          path: SAINTS_WVUE.mp4
-
-      - name: Upload Saints WWL Artifact
-        if: always() && github.event.inputs.target == 'saints wwl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: SAINTS_WWL_${{ github.run_id }}
-          path: SAINTS_WWL.mp4
 
       - name: Confirm Completion
         run: echo "✅ Stream ritual complete at $(date)"
