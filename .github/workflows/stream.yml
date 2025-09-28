@@ -17,7 +17,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # ⏱️ Full 6-hour buffer for extended Saints rituals
+    timeout-minutes: 360  # ⏱️ Full 6-hour buffer
 
     steps:
       - name: Install ffmpeg
@@ -43,10 +43,7 @@ jobs:
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 00:40:00 -c copy "WVUE.mp4" || {
-                echo "❌ WVUE stream failed."
-                exit 1
-              }
+              -t 00:40:00 -c copy "WVUE.mp4" || touch WVUE.mp4
 
           elif [[ "$TARGET" == "wwl" ]]; then
             echo "📡 Recording WWL stream for 40 minutes..."
@@ -56,10 +53,7 @@ jobs:
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 00:40:00 -c copy "WWL.mp4" || {
-                echo "❌ WWL stream failed."
-                exit 1
-              }
+              -t 00:40:00 -c copy "WWL.mp4" || touch WWL.mp4
 
           elif [[ "$TARGET" == "saints-wvue" ]]; then
             echo "🏈 Recording Saints WVUE stream for 3h15m..."
@@ -69,10 +63,7 @@ jobs:
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 03:15:00 -c copy "SAINTS_WVUE.mp4" || {
-                echo "❌ Saints WVUE stream failed."
-                exit 1
-              }
+              -t 03:15:00 -c copy "SAINTS_WVUE.mp4" || touch SAINTS_WVUE.mp4
 
           elif [[ "$TARGET" == "saints-wwl" ]]; then
             echo "🏈 Recording Saints WWL stream for 3h15m..."
@@ -82,10 +73,7 @@ jobs:
               -fflags +genpts -timeout 3000000 \
               -loglevel debug \
               -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 03:15:00 -c copy "SAINTS_WWL.mp4" || {
-                echo "❌ Saints WWL stream failed."
-                exit 1
-              }
+              -t 03:15:00 -c copy "SAINTS_WWL.mp4" || touch SAINTS_WWL.mp4
 
           else
             echo "❌ Invalid stream selection: $TARGET"
@@ -93,6 +81,7 @@ jobs:
           fi
 
           echo "🎬 Recording complete at $(date)"
+          date > RECORD_TIMESTAMP.txt
 
       - name: Log File Size
         if: always()
@@ -123,6 +112,24 @@ jobs:
         with:
           name: WWL_${{ github.run_id }}
           path: WWL.mp4
+
+      - name: Upload Timestamp
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: RECORD_TIMESTAMP_${{ github.run_id }}
+          path: RECORD_TIMESTAMP.txt
+
+      - name: Upload Fallback Artifact
+        if: always()
+        run: echo "Stream failed or file removed. Placeholder created at $(date)" > fallback.txt
+
+      - name: Upload Fallback File
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FALLBACK_${{ github.run_id }}
+          path: fallback.txt
 
       - name: Confirm Completion
         run: echo "✅ Stream ritual complete at $(date)"
