@@ -1,124 +1,23 @@
-name: Stream Ritual
+Manually triggered now
+@nodemery747nodemery747
+⁠
+ bf04bd9
+main
+Status
+Failure
+Total duration
+9s
+Artifacts
+–
 
-on:
-  workflow_dispatch:
-    inputs:
-      target:
-        description: "Select stream target"
-        required: true
-        type: choice
-        options:
-          - wvue
-          - wwl
-          - saints-wvue
-          - saints-wwl
 
-jobs:
-  record:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Record Selected Stream
-        run: |
-          echo "🎙️ Invoking stream ritual for ${{ github.event.inputs.target }} at $(date)"
-
-          TARGET="${{ github.event.inputs.target }}"
-
-          if [[ "$TARGET" == "wvue" ]]; then
-            ffmpeg -nostdin -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 -loglevel debug \
-              -i "https://..." -t 03:15:00 -c copy WVUE.mp4
-
-          elif [[ "$TARGET" == "wwl" ]]; then
-            ffmpeg -nostdin -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 -loglevel debug \
-              -i "https://..." -t 03:15:00 -c copy WWL.mp4
-
-          elif [[ "$TARGET" == "saints-wvue" ]]; then
-            ffmpeg -nostdin -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 -loglevel debug \
-              -i "https://..." -t 03:15:00 -c copy Saints_wvue.mp4
-
-          elif [[ "$TARGET" == "saints-wwl" ]]; then
-            ffmpeg -nostdin -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 -loglevel debug \
-              -i "https://..." -t 03:15:00 -c copy Saints_wwl.mp4
-
-          else
-            echo "❌ Invalid stream selection: $TARGET"
-            exit 1
-          fi
-
-          echo "🎬 ffmpeg exited with code $?"
-
-          for file in *.mp4; do
-            if [ ! -f "$file" ]; then
-              echo "⚠️ $file not found after recording. Creating empty placeholder."
-              touch "$file"
-            fi
-
-            size=$(du -m "$file" | cut -f1)
-            echo "📦 $file size: $size MB"
-
-            if [ "$size" -gt 2048 ]; then
-              echo "⚠️ $file exceeds 2GB artifact limit ($size MB). Renaming to prevent upload."
-              mv "$file" "${file%.mp4}_TOO_BIG.mp4"
-            fi
-          done
-
-          date > RECORD_TIMESTAMP.txt
-
-      - name: Upload Timestamp
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: RECORD_TIMESTAMP_${{ github.run_id }}
-          path: RECORD_TIMESTAMP.txt
-
-      - name: Upload WVUE Artifact
-        if: always() && github.event.inputs.target == 'wvue'
-        uses: actions/upload-artifact@v4
-        with:
-          name: WVUE_${{ github.run_id }}
-          path: WVUE.mp4
-
-      - name: Upload WWL Artifact
-        if: always() && github.event.inputs.target == 'wwl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: WWL_${{ github.run_id }}
-          path: WWL.mp4
-
-      - name: Upload Saints WVUE Artifact
-        if: always() && github.event.inputs.target == 'saints-wvue'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Saints_wvue_${{ github.run_id }}
-          path: Saints_wvue.mp4
-
-      - name: Upload Saints WWL Artifact
-        if: always() && github.event.inputs.target == 'saints-wwl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Saints_wwl_${{ github.run_id }}
-          path: Saints_wwl.mp4
-
-      - name: Upload Saints WVUE Oversized Artifact
-        if: always() && github.event.inputs.target == 'saints-wvue'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Saints_wvue_TOO_BIG_${{ github.run_id }}
-          path: Saints_wvue_TOO_BIG.mp4
-
-      - name: Upload Saints WWL Oversized Artifact
-        if: always() && github.event.inputs.target == 'saints-wwl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Saints_wwl_TOO_BIG_${{ github.run_id }}
-          path: Saints_wwl_TOO_BIG.mp4
+Annotations
+1 error and 3 warnings
+record
+Process completed with exit code 127.
+record
+No files were found with the provided path: Saints_wvue_TOO_BIG.mp4. No artifacts will be uploaded.
+record
+No files were found with the provided path: Saints_wvue.mp4. No artifacts will be uploaded.
+record
+No files were found with the provided path: RECORD_TIMESTAMP.txt. No artifacts will be uploaded.
