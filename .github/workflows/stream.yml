@@ -29,7 +29,7 @@ jobs:
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 42m..."
+            echo "📡 Recording WVUE stream for 60m..."
             ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
@@ -38,7 +38,7 @@ jobs:
               -t 01:00:00 -c copy "WVUE.mp4"
 
           elif [[ "$TARGET" == "wwl" ]]; then
-            echo "📡 Recording WWL stream for 42m..."
+            echo "📡 Recording WWL stream for 60m..."
             ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
