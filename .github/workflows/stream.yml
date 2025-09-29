@@ -29,22 +29,22 @@ jobs:
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 3h15m..."
+            echo "📡 Recording WVUE stream for 42m..."
             ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 03:15:00 -c copy "WVUE.mp4"
+              -t 00:42:00 -c copy "WVUE.mp4"
 
           elif [[ "$TARGET" == "wwl" ]]; then
-            echo "📡 Recording WWL stream for 3h15m..."
+            echo "📡 Recording WWL stream for 42m..."
             ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
               -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 03:15:00 -c copy "WWL.mp4"
+              -t 00:42:00 -c copy "WWL.mp4"
 
           else
             echo "❌ Invalid stream selection: $TARGET"
