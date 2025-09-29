@@ -1,4 +1,4 @@
-name: Stream Ritual – WVUE or WWL (Short Form + Saints Extended)
+name: Stream Ritual – WVUE or WWL
 
 on:
   workflow_dispatch:
@@ -11,8 +11,6 @@ on:
         options:
           - wvue
           - wwl
-          - saints-wvue
-          - saints-wwl
 
 jobs:
   record:
@@ -23,11 +21,6 @@ jobs:
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Purge Runner Cache
-        run: |
-          echo "🧹 Clearing temp cache at $(date)"
-          sudo rm -rf /tmp/*
-
       - name: Record Selected Stream
         env:
           TARGET: ${{ github.event.inputs.target }}
@@ -36,100 +29,38 @@ jobs:
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
           if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 40 minutes..."
-            timeout 2400 ffmpeg -nostdin \
+            echo "📡 Recording WVUE stream for 3h15m..."
+            ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
-              -loglevel debug \
               -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 00:40:00 -c copy "WVUE.mp4" || touch WVUE.mp4
+              -t 03:15:00 -c copy "WVUE.mp4"
 
           elif [[ "$TARGET" == "wwl" ]]; then
-            echo "📡 Recording WWL stream for 40 minutes..."
-            timeout 2400 ffmpeg -nostdin \
+            echo "📡 Recording WWL stream for 3h15m..."
+            ffmpeg -nostdin \
               -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
               -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
               -fflags +genpts -timeout 3000000 \
-              -loglevel debug \
               -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 00:40:00 -c copy "WWL.mp4" || touch WWL.mp4
-
-          elif [[ "$TARGET" == "saints-wvue" ]]; then
-            echo "🏈 Recording Saints WVUE stream for 3h15m..."
-            timeout 11700 ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -loglevel debug \
-              -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 03:15:00 -c copy "SAINTS_WVUE.mp4" || touch SAINTS_WVUE.mp4
-
-          elif [[ "$TARGET" == "saints-wwl" ]]; then
-            echo "🏈 Recording Saints WWL stream for 3h15m..."
-            timeout 11700 ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -loglevel debug \
-              -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 03:15:00 -c copy "SAINTS_WWL.mp4" || touch SAINTS_WWL.mp4
+              -t 03:15:00 -c copy "WWL.mp4"
 
           else
             echo "❌ Invalid stream selection: $TARGET"
             exit 1
           fi
 
-          echo "🎬 Recording complete at $(date)"
-          date > RECORD_TIMESTAMP.txt
-
-      - name: Log File Size
-        if: always()
-        run: ls -lh *.mp4 || echo "⚠️ No .mp4 file found."
-
-      - name: Check File Size
-        if: always()
-        run: |
-          for file in *.mp4; do
-            size=$(du -m "$file" | cut -f1)
-            echo "📦 $file size: $size MB"
-            if [ "$size" -gt 2048 ]; then
-              echo "⚠️ $file exceeds 2GB artifact limit ($size MB). Removing to prevent truncation."
-              rm "$file"
-            fi
-          done
-
       - name: Upload WVUE Artifact
-        if: always() && github.event.inputs.target == 'wvue'
+        if: github.event.inputs.target == 'wvue'
         uses: actions/upload-artifact@v4
         with:
           name: WVUE_${{ github.run_id }}
           path: WVUE.mp4
 
       - name: Upload WWL Artifact
-        if: always() && github.event.inputs.target == 'wwl'
+        if: github.event.inputs.target == 'wwl'
         uses: actions/upload-artifact@v4
         with:
           name: WWL_${{ github.run_id }}
           path: WWL.mp4
-
-      - name: Upload Timestamp
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: RECORD_TIMESTAMP_${{ github.run_id }}
-          path: RECORD_TIMESTAMP.txt
-
-      - name: Upload Fallback Artifact
-        if: always()
-        run: echo "Stream failed or file removed. Placeholder created at $(date)" > fallback.txt
-
-      - name: Upload Fallback File
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: FALLBACK_${{ github.run_id }}
-          path: fallback.txt
-
-      - name: Confirm Completion
-        run: echo "✅ Stream ritual complete at $(date)"
