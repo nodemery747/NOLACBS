@@ -59,6 +59,7 @@ jobs:
           else
             echo "❌ Invalid stream selection: $TARGET"
             exit 1
+          fi
 
       - name: Upload WVUE Artifact
         if: github.event.inputs.target == 'wvue'
