@@ -1,4 +1,4 @@
-name: Stream Ritual – WVUE or WWL
+name: Stream Ritual – WVUE, WWL, KGWN
 
 on:
   workflow_dispatch:
@@ -11,6 +11,7 @@ on:
         options:
           - wvue
           - wwl
+          - kgwn
 
 jobs:
   record:
@@ -46,10 +47,18 @@ jobs:
               -i "${{ secrets.WWL_STREAM_URL }}" \
               -t 00:40:00 -c copy "WWL.mp4"
 
+          elif [[ "$TARGET" == "kgwn" ]]; then
+            echo "📡 Recording KGWN stream for 40m..."
+            ffmpeg -nostdin \
+              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+              -fflags +genpts -timeout 3000000 \
+              -i "${{ secrets.KGWN_STREAM_URL }}" \
+              -t 00:40:00 -c copy "KGWN.mp4"
+
           else
             echo "❌ Invalid stream selection: $TARGET"
             exit 1
-          fi
 
       - name: Upload WVUE Artifact
         if: github.event.inputs.target == 'wvue'
@@ -64,3 +73,10 @@ jobs:
         with:
           name: WWL_${{ github.run_id }}
           path: WWL.mp4
+
+      - name: Upload KGWN Artifact
+        if: github.event.inputs.target == 'kgwn'
+        uses: actions/upload-artifact@v4
+        with:
+          name: KGWN_${{ github.run_id }}
+          path: KGWN.mp4
