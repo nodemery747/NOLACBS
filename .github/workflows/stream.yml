@@ -30,38 +30,75 @@ jobs:
           echo "🎙️ Invoking stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
-          if [[ "$TARGET" == "wvue" ]]; then
-            echo "📡 Recording WVUE stream for 40m..."
-            ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -i "${{ secrets.WVUE_STREAM_URL }}" \
-              -t 00:40:00 -c copy "WVUE.mp4"
+          case "$TARGET" in
+            wvue)
+              echo "📡 Recording WVUE stream for 40m..."
+              ffmpeg -nostdin \
+                -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+                -fflags +genpts -timeout 3000000 \
+                -i "${{ secrets.WVUE_STREAM_URL }}" \
+                -t 00:40:00 -c copy "WVUE.mp4"
+              ;;
+            wwl)
+              echo "📡 Recording WWL stream for 40m..."
+              ffmpeg -nostdin \
+                -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+                -fflags +genpts -timeout 3000000 \
+                -i "${{ secrets.WWL_STREAM_URL }}" \
+                -t 00:40:00 -c copy "WWL.mp4"
+              ;;
+            kgwn)
+              echo "📡 Recording KGWN stream for 40m..."
+              ffmpeg -nostdin \
+                -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+                -fflags +genpts -timeout 3000000 \
+                -i "${{ secrets.KGWN_STREAM_URL }}" \
+                -t 00:40:00 -c copy "KGWN.mp4"
+              ;;
+            wwlplus)
+              echo "📡 Recording WWLPLUS (Tegna) stream for 40m..."
+              ffmpeg -nostdin \
+                -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+                -fflags +genpts -timeout 3000000 \
+                -i "https://video.tegnaone.com/wwl/live/v1/manifest/f9c1bf9ffd6ac86b6173a7c169ff6e3f4efbd693/WWL-Production/4be1abeb-be94-4633-b536-eca2bb43d8db/0.m3u8" \
+                -t 00:40:00 -c copy "WWLPLUS.mp4"
+              ;;
+            *)
+              echo "❌ Invalid stream selection: $TARGET"
+              exit 1
+              ;;
+          esac
 
-          elif [[ "$TARGET" == "wwl" ]]; then
-            echo "📡 Recording WWL stream for 40m..."
-            ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -i "${{ secrets.WWL_STREAM_URL }}" \
-              -t 00:40:00 -c copy "WWL.mp4"
+          echo "✅ Stream ritual complete for $TARGET at $(date)"
 
-          elif [[ "$TARGET" == "kgwn" ]]; then
-            echo "📡 Recording KGWN stream for 40m..."
-            ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -i "${{ secrets.KGWN_STREAM_URL }}" \
-              -t 00:40:00 -c copy "KGWN.mp4"
+      - name: Upload WVUE Artifact
+        if: github.event.inputs.target == 'wvue'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WVUE_${{ github.run_id }}
+          path: WVUE.mp4
 
-          elif [[ "$TARGET" == "wwlplus" ]]; then
-            echo "📡 Recording WWLPLUS (Tegna) stream for 40m..."
-            ffmpeg -nostdin \
-              -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
-              -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-              -fflags +genpts -timeout 3000000 \
-              -i "https://video.tegnaone.com/wwl/live/v1/manifest/f9c1bf9ffd6ac86b6173a7c169ff6e3f4efbd693/WWL-Production/4be1abeb-be94-4633-b536-eca2bb43d8db/0.m3u8" \
-             
+      - name: Upload WWL Artifact
+        if: github.event.inputs.target == 'wwl'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WWL_${{ github.run_id }}
+          path: WWL.mp4
+
+      - name: Upload KGWN Artifact
+        if: github.event.inputs.target == 'kgwn'
+        uses: actions/upload-artifact@v4
+        with:
+          name: KGWN_${{ github.run_id }}
+          path: KGWN.mp4
+
+      - name: Upload WWLPLUS Artifact
+        if: github.event.inputs.target == 'wwlplus'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WWLPLUS_${{ github.run_id }}
+          path: WWLPLUS.mp4
