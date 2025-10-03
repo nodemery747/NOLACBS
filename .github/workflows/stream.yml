@@ -59,13 +59,13 @@ jobs:
                 -t 00:40:00 -c copy "KGWN.mp4"
               ;;
             wwlplus)
-              echo "📡 Recording WWLPLUS (Tegna) stream for 40m..."
+              echo "📡 Recording WWLPLUS (Tegna) stream for 65m..."
               ffmpeg -nostdin \
                 -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
                 -i "https://video.tegnaone.com/wwl/live/v1/manifest/f9c1bf9ffd6ac86b6173a7c169ff6e3f4efbd693/WWL-Production/4be1abeb-be94-4633-b536-eca2bb43d8db/0.m3u8" \
-                -t 00:40:00 -c copy "WWLPLUS.mp4"
+                -t 00:65:00 -c copy "WWLPLUS.mp4"
               ;;
             *)
               echo "❌ Invalid stream selection: $TARGET"
