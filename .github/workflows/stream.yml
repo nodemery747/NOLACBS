@@ -32,22 +32,22 @@ jobs:
 
           case "$TARGET" in
             wvue)
-              echo "📡 Recording WVUE stream for 40m..."
+              echo "📡 Recording WVUE stream for 45m..."
               ffmpeg -nostdin \
                 -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
                 -i "${{ secrets.WVUE_STREAM_URL }}" \
-                -t 00:40:00 -c copy "WVUE.mp4"
+                -t 00:45:00 -c copy "WVUE.mp4"
               ;;
             wwl)
-              echo "📡 Recording WWL stream for 40m..."
+              echo "📡 Recording WWL stream for 45m..."
               ffmpeg -nostdin \
                 -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
                 -i "${{ secrets.WWL_STREAM_URL }}" \
-                -t 00:40:00 -c copy "WWL.mp4"
+                -t 00:45:00 -c copy "WWL.mp4"
               ;;
             kgwn)
               echo "📡 Recording KGWN stream for 40m..."
