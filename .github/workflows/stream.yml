@@ -1,10 +1,10 @@
-name: Stream Ritual – WVUE, WWL, WWLPLUS
+name: stream ritual – wvue, wwl, wwlplus
 
 on:
   workflow_dispatch:
     inputs:
       target:
-        description: "Choose which stream to record"
+        description: "choose which stream to record"
         required: true
         default: "wvue"
         type: choice
@@ -16,72 +16,72 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # ⏱️ Full 6-hour buffer
+    timeout-minutes: 360  # ⏱️ full 6-hour buffer
 
     steps:
-      - name: Install ffmpeg
+      - name: install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Record Selected Stream
+      - name: record selected stream
         env:
           TARGET: ${{ github.event.inputs.target }}
         run: |
-          echo "🎙️ Invoking stream ritual for $TARGET at $(date)"
+          echo "🎙️ invoking stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
           case "$TARGET" in
             wvue)
-              echo "📡 Recording WVUE stream for 45m..."
+              echo "📡 recording wvue stream for 45m..."
               ffmpeg -nostdin \
-                -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
                 -i "${{ secrets.WVUE_STREAM_URL }}" \
-                -t 00:45:00 -c copy "WVUE.mp4"
+                -t 00:45:00 -c copy "wvue.mp4"
               ;;
             wwl)
-              echo "📡 Recording WWL stream for 45m..."
+              echo "📡 recording wwl stream for 45m..."
               ffmpeg -nostdin \
-                -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
                 -i "${{ secrets.WWL_STREAM_URL }}" \
-                -t 00:45:00 -c copy "WWL.mp4"
+                -t 00:45:00 -c copy "wwl.mp4"
               ;;
             wwlplus)
-              echo "📡 Recording WWLPLUS (Tegna) stream for 65m..."
+              echo "📡 recording wwlplus (tegna) stream for 65m..."
               ffmpeg -nostdin \
-                -headers "User-Agent: VLC/3.0.11\r\nAccept: */*\r\nConnection: keep-alive" \
+                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
                 -i "https://video.tegnaone.com/wwl/live/v1/manifest/f9c1bf9ffd6ac86b6173a7c169ff6e3f4efbd693/WWL-Production/4be1abeb-be94-4633-b536-eca2bb43d8db/0.m3u8" \
-                -t 01:05:00 -c copy "WWLPLUS.mp4"
+                -t 01:05:00 -c copy "wwlplus.mp4"
               ;;
             *)
-              echo "❌ Invalid stream selection: $TARGET"
+              echo "❌ invalid stream selection: $TARGET"
               exit 1
               ;;
           esac
 
-          echo "✅ Stream ritual complete for $TARGET at $(date)"
+          echo "✅ stream ritual complete for $TARGET at $(date)"
 
-      - name: Upload WVUE Artifact
+      - name: upload wvue artifact
         if: github.event.inputs.target == 'wvue'
         uses: actions/upload-artifact@v4
         with:
-          name: WVUE_${{ github.run_id }}
-          path: WVUE.mp4
+          name: wvue_${{ github.run_id }}
+          path: wvue.mp4
 
-      - name: Upload WWL Artifact
+      - name: upload wwl artifact
         if: github.event.inputs.target == 'wwl'
         uses: actions/upload-artifact@v4
         with:
-          name: WWL_${{ github.run_id }}
-          path: WWL.mp4
+          name: wwl_${{ github.run_id }}
+          path: wwl.mp4
 
-      - name: Upload WWLPLUS Artifact
+      - name: upload wwlplus artifact
         if: github.event.inputs.target == 'wwlplus'
         uses: actions/upload-artifact@v4
         with:
-          name: WWLPLUS_${{ github.run_id }}
-          path: WWLPLUS.mp4
+          name: wwlplus_${{ github.run_id }}
+          path: wwlplus.mp4
