@@ -31,13 +31,13 @@ jobs:
 
           case "$TARGET" in
             wvue)
-              echo "📡 recording wvue stream for 35m..."
+              echo "📡 recording wvue stream for 45m..."
               ffmpeg -nostdin \
                 -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
                 -i "${{ secrets.WVUE_STREAM_URL }}" \
-                -t 00:35:00 -c copy "wvue.mp4"
+                -t 00:45:00 -c copy "wvue.mp4"
               ;;
             wwl)
               echo "📡 recording wwl stream for 45m..."
