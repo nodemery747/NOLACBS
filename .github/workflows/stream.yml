@@ -54,7 +54,7 @@ jobs:
                 -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
-                -i "https://video.tegnaone.com/wwl/live/v1/manifest/f9c1bf9ffd6ac86b6173a7c169ff6e3f4efbd693/WWL-Production/666ee1d7-995f-4dc3-ae70-0ec9db74d3c9/0.m3u8" \
+                -i "https://video.tegnaone.com/wwl/live/v1/master/f9c1bf9ffd6ac86b6173a7c169ff6e3f4efbd693/WWL-Production/live/index.m3u8?ads.channel=WWL&ads.category=&ads.content_id=666077c7-80ed-4b52-976a-0c823f69d6f4&ads.language=en&ads.length=1671&ads.network=&ads.genre=news&ads.gpp=DBABLA~BVQqAAAAAABY.QA&ads.livestream=0&ads.p_uid=2426bc68-bc5e-4cde-81ac-b02feecc0f07&ads.page_url=https%253A%252F%252Fwww.wwltv.com%252F&ads.player_height=422&ads.player_width=750&ads.rating=NR&ads.site_name=WWL&ads.site_page=https%253A%252F%252Fwww.wwltv.com%252F&ads.src_page_url=https%253A%252F%252Fwww.wwltv.com%252Fwatch&ads.title=WWL%2520Louisiana%2520-%2520News%2520at%2520Noon&ads.ua=Mozilla%252F5.0%2520%2528Windows%2520NT%252010.0%253B%2520Win64%253B%2520x64%2529%2520AppleWebKit%252F537.36%2520%2528KHTML%252C%2520like%2520Gecko%2529%2520Chrome%252F141.0.0.0%2520Safari%252F537.36&ads.us_privacy=1YNY&ads.video_plcmt=1&ads.site_id=9336" \
                 -t 01:05:00 -c copy "wwlplus.mp4"
               ;;
             *)
