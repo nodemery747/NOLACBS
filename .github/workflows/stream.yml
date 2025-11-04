@@ -16,7 +16,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # ⏱️ full 6-hour buffer
+    timeout-minutes: 360
 
     steps:
       - name: install ffmpeg
@@ -26,62 +26,38 @@ jobs:
         env:
           TARGET: ${{ github.event.inputs.target }}
         run: |
-          echo "🎙️ invoking stream ritual for $TARGET at $(date)"
+          echo "🎙️ starting stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
-          case "$TARGET" in
-            wvue)
-              echo "📡 recording wvue stream for 45m..."
-              ffmpeg -nostdin \
-                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
-                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-                -fflags +genpts -timeout 3000000 \
-                -i "${{ secrets.WVUE_STREAM_URL }}" \
-                -t 00:45:00 -c copy "wvue.mp4"
-              ;;
-            wwl)
-              echo "📡 recording wwl stream for 45m..."
-              ffmpeg -nostdin \
-                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
-                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-                -fflags +genpts -timeout 3000000 \
-                -i "${{ secrets.WWL_STREAM_URL }}" \
-                -t 00:45:00 -c copy "wwl.mp4"
-              ;;
-            foxvod)
-              echo "📡 recording Fox VOD stream for 60m..."
-              ffmpeg -nostdin \
-                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
-                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-                -fflags +genpts -timeout 3000000 \
-                -i "${{ secrets.FOX_VOD_URL }}" \
-                -t 01:00:00 -c copy "foxvod.mp4"
-              ;;
-            *)
-              echo "❌ invalid stream selection: $TARGET"
-              exit 1
-              ;;
-          esac
+          if [[ "$TARGET" == "wvue" ]]; then
+            STREAM_URL="https://foxdtc-video.akamaized.net/live/wvue-ue2/index_1.m3u8"
+            OUTPUT="wvue.mp4"
+            DURATION="00:45:00"
+          elif [[ "$TARGET" == "wwl" ]]; then
+            STREAM_URL="https://foxdtc-video.akamaized.net/live/wwl-ue2/index_1.m3u8"
+            OUTPUT="wwl.mp4"
+            DURATION="00:45:00"
+          elif [[ "$TARGET" == "foxvod" ]]; then
+            STREAM_URL="https://cf.edge.foxdtc.digitalvideoplatform.com/9df7e87c043f9c9ac1a463f8629173398d4e001d.20251104101947/live/wvue-ue2/index_4.m3u8?zipcode=70458&start=2025-11-04T04:29:00.000Z&end=2025-11-04T05:07:00.000Z"
+            OUTPUT="foxvod.mp4"
+            DURATION="00:38:00"
+          else
+            echo "❌ invalid stream selection: $TARGET"
+            exit 1
+          fi
+
+          echo "📡 recording $TARGET stream for $DURATION..."
+          ffmpeg -nostdin \
+            -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
+            -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+            -fflags +genpts -timeout 3000000 \
+            -i "$STREAM_URL" \
+            -t "$DURATION" -c copy "$OUTPUT"
 
           echo "✅ stream ritual complete for $TARGET at $(date)"
 
-      - name: upload wvue artifact
-        if: github.event.inputs.target == 'wvue'
+      - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wvue_${{ github.run_id }}
-          path: wvue.mp4
-
-      - name: upload wwl artifact
-        if: github.event.inputs.target == 'wwl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: wwl_${{ github.run_id }}
-          path: wwl.mp4
-
-      - name: upload foxvod artifact
-        if: github.event.inputs.target == 'foxvod'
-        uses: actions/upload-artifact@v4
-        with:
-          name: foxvod_${{ github.run_id }}
-          path: foxvod.mp4
+          name: ${{ github.event.inputs.target }}_${{ github.run_id }}
+          path: ${{ github.event.inputs.target }}.mp4
