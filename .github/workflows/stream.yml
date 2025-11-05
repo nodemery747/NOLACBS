@@ -31,7 +31,7 @@ jobs:
 
           if [[ "$TARGET" == "wvue" ]]; then
             STREAM_URL="https://foxdtc-video.akamaized.net/live/wvue-ue2/index_1.m3u8"
-            OUTPUT="wvue.mp4"
+            OUTPUT="wvue.ts"
             DURATION="00:45:00"
           elif [[ "$TARGET" == "wwl" ]]; then
             STREAM_URL="https://foxdtc-video.akamaized.net/live/wwl-ue2/index_1.m3u8"
