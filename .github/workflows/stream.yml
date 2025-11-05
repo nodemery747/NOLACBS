@@ -42,7 +42,7 @@ jobs:
           elif [[ "$TARGET" == "foxvod" ]]; then
             STREAM_URL="https://cf.edge.foxdtc.digitalvideoplatform.com/9df7e87c043f9c9ac1a463f8629173398d4e001d.20251104101947/live/wvue-ue2/index_1.m3u8?zipcode=70458&start=2025-11-05T04:34:00.000Z&end=2025-11-05T05:06:00.000Z"
             OUTPUT="foxvod.mp4"
-            DURATION="00:33:00"
+            DURATION="00:32:00"
           else
             echo "❌ invalid stream selection: $TARGET"
             exit 1
@@ -62,4 +62,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.inputs.target }}_${{ github.run_id }}
-          path: ${{ env.OUTPUT }}
+          path: ${{ github.event.inputs.target }}.mp4
