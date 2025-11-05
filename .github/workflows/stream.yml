@@ -1,7 +1,11 @@
-name: stream ritual – wwl direct
+name: stream ritual – WVUE or WWL
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Choose stream: wvue or wwl'
+        required: true
 
 jobs:
   record:
@@ -12,12 +16,23 @@ jobs:
       - name: install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: record WWL stream directly
+      - name: record selected stream
         run: |
-          echo "🎙️ starting WWL stream at $(date)"
-          STREAM_URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22"
-          OUTPUT="wwl_direct.mp4"
-          DURATION="00:45:00"
+          echo "🎙️ starting stream ritual for ${{ github.event.inputs.target }} at $(date)"
+          TARGET=$(echo "${{ github.event.inputs.target }}" | tr '[:upper:]' '[:lower:]' | xargs)
+
+          if [[ "$TARGET" == "wvue" ]]; then
+            STREAM_URL="https://cf.edge.foxdtc.digitalvideoplatform.com/11e434c9406d0904117e4c8af89dafe17d3cf22c.20251011050115/live-dr/wvue-ue2/index_2.m3u8"
+            OUTPUT="wvue.mp4"
+            DURATION="00:45:00"
+          elif [[ "$TARGET" == "wwl" ]]; then
+            STREAM_URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22"
+            OUTPUT="wwl.mp4"
+            DURATION="00:45:00"
+          else
+            echo "❌ unknown target: $TARGET"
+            exit 1
+          fi
 
           ffmpeg -nostdin \
             -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
@@ -27,7 +42,7 @@ jobs:
             -t "$DURATION" -c copy "$OUTPUT"
 
           echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
-          echo "✅ WWL stream complete at $(date)"
+          echo "✅ $TARGET stream complete at $(date)"
 
       - name: verify output file exists
         run: |
@@ -39,5 +54,5 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wwl_direct_${{ github.run_id }}
+          name: ${{ github.event.inputs.target }}_${{ github.run_id }}
           path: ${{ env.OUTPUT }}
