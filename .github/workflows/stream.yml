@@ -25,22 +25,26 @@ jobs:
       - name: record selected stream
         env:
           TARGET: ${{ github.event.inputs.target }}
+          WVUE_TOKEN: ${{ secrets.WVUE_TOKEN }}
+          WWL_TOKEN: ${{ secrets.WWL_TOKEN }}
         run: |
+          echo "::add-mask::$WVUE_TOKEN"
+          echo "::add-mask::$WWL_TOKEN"
           echo "🎙️ starting stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
           if [[ "$TARGET" == "wvue" ]]; then
-            STREAM_URL="https://foxdtc-video.akamaized.net/live/wvue-ue2/index_1.m3u8"
+            STREAM_URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/2215/5743360/media.m3u8?request_token=$WVUE_TOKEN"
             OUTPUT="wvue.ts"
             DURATION="00:45:00"
           elif [[ "$TARGET" == "wwl" ]]; then
-            STREAM_URL="https://foxdtc-video.akamaized.net/live/wwl-ue2/index_1.m3u8"
-            OUTPUT="wwl.mp4"
-            DURATION="00:45:00"
+            STREAM_URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=$WWL_TOKEN"
+            OUTPUT="wwl.ts"
+            DURATION="00:33:00"
           elif [[ "$TARGET" == "foxvod" ]]; then
             STREAM_URL="https://fa.edge.foxdtc.digitalvideoplatform.com/1762369819_1228a1fc0443665d0f9d178dd62c85964b1dcdc8/*~/live/wvue-ue2/index_1.m3u8?zipcode=70458&start=2025-11-05T04:29:00.000Z&end=2025-11-05T05:07:00.000Z"
             OUTPUT="foxvod.ts"
-            DURATION="00:33:00"
+            DURATION="00:38:00"
           else
             echo "❌ invalid stream selection: $TARGET"
             exit 1
@@ -60,4 +64,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.inputs.target }}_${{ github.run_id }}
-          path: ${{ github.event.inputs.target }}.mp4
+          path: ${{ env.OUTPUT }}
