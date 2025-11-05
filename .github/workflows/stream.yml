@@ -1,58 +1,67 @@
-name: stream ritual – WVUE or WWL
+name: stream ritual – wvue or wwl
 
 on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Choose stream: wvue or wwl'
+        description: "choose which stream to record"
         required: true
+        type: choice
+        options:
+          - wvue
+          - wwl
 
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 360  # ⏱️ full 6-hour buffer
 
     steps:
       - name: install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: record selected stream
+        env:
+          TARGET: ${{ github.event.inputs.target }}
         run: |
-          echo "🎙️ starting stream ritual for ${{ github.event.inputs.target }} at $(date)"
-          TARGET=$(echo "${{ github.event.inputs.target }}" | tr '[:upper:]' '[:lower:]' | xargs)
+          echo "🎙️ invoking stream ritual for $TARGET at $(date)"
+          TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
+          case "$TARGET" in
+            wvue)
+              echo "📡 recording wvue stream for 45m..."
+              ffmpeg -nostdin \
+                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
+                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+                -fflags +genpts -timeout 3000000 \
+                -i "https://cf.edge.foxdtc.digitalvideoplatform.com/11e434c9406d0904117e4c8af89dafe17d3cf22c.20251011050115/live-dr/wvue-ue2/index_2.m3u8" \
+                -t 00:45:00 -c copy "wvue.mp4"
+              ;;
+            wwl)
+              echo "📡 recording wwl stream for 45m..."
+              ffmpeg -nostdin \
+                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
+                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+                -fflags +genpts -timeout 3000000 \
+                -i "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22" \
+                -t 00:45:00 -c copy "wwl.mp4"
+              ;;
+            *)
+              echo "❌ invalid stream selection: $TARGET"
+              exit 1
+              ;;
+          esac
+          echo "✅ stream ritual complete for $TARGET at $(date)"
 
-          if [[ "$TARGET" == "wvue" ]]; then
-            STREAM_URL="https://cf.edge.foxdtc.digitalvideoplatform.com/11e434c9406d0904117e4c8af89dafe17d3cf22c.20251011050115/live-dr/wvue-ue2/index_2.m3u8"
-            OUTPUT="wvue.mp4"
-            DURATION="00:45:00"
-          elif [[ "$TARGET" == "wwl" ]]; then
-            STREAM_URL="https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22"
-            OUTPUT="wwl.mp4"
-            DURATION="00:45:00"
-          else
-            echo "❌ unknown target: $TARGET"
-            exit 1
-          fi
-
-          ffmpeg -nostdin \
-            -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
-            -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-            -fflags +genpts -timeout 3000000 \
-            -i "$STREAM_URL" \
-            -t "$DURATION" -c copy "$OUTPUT"
-
-          echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
-          echo "✅ $TARGET stream complete at $(date)"
-
-      - name: verify output file exists
-        run: |
-          if [[ ! -f "${{ env.OUTPUT }}" ]]; then
-            echo "❌ recording failed — no output file found: ${{ env.OUTPUT }}"
-            exit 1
-          fi
-
-      - name: upload artifact
+      - name: upload wvue artifact
+        if: github.event.inputs.target == 'wvue'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.target }}_${{ github.run_id }}
-          path: ${{ env.OUTPUT }}
+          name: wvue_${{ github.run_id }}
+          path: wvue.mp4
+
+      - name: upload wwl artifact
+        if: github.event.inputs.target == 'wwl'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wwl_${{ github.run_id }}
+          path: wwl.mp4
