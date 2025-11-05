@@ -56,10 +56,18 @@ jobs:
             -i "$STREAM_URL" \
             -t "$DURATION" -c copy "$OUTPUT"
 
+          echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
           echo "✅ stream ritual complete for $TARGET at $(date)"
+
+      - name: verify output file exists
+        run: |
+          if [[ ! -f "${{ env.OUTPUT }}" ]]; then
+            echo "❌ recording failed — no output file found: ${{ env.OUTPUT }}"
+            exit 1
+          fi
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.inputs.target }}_${{ github.run_id }}
-          path: ${{ github.event.inputs.target }}.mp4
+          path: ${{ env.OUTPUT }}
