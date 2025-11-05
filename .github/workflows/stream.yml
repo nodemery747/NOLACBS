@@ -23,6 +23,8 @@ jobs:
       - name: record selected stream
         env:
           TARGET: ${{ github.event.inputs.target }}
+          WVUE_STREAM_URL: ${{ secrets.WVUE_STREAM_URL }}
+          WWL_STREAM_URL: ${{ secrets.WWL_STREAM_URL }}
         run: |
           echo "🎙️ invoking stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
@@ -33,7 +35,7 @@ jobs:
                 -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
-                -i "https://cf.edge.foxdtc.digitalvideoplatform.com/11e434c9406d0904117e4c8af89dafe17d3cf22c.20251011050115/live-dr/wvue-ue2/index_2.m3u8" \
+                -i "$WVUE_STREAM_URL" \
                 -t 00:45:00 -c copy "wvue.mp4"
               ;;
             wwl)
@@ -42,7 +44,7 @@ jobs:
                 -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
                 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
                 -fflags +genpts -timeout 3000000 \
-                -i "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/868751/5743360/media.m3u8?request_token=AA5IAyOWBqa9ebEzjN3VCgKYUt9A8-_HCLq-7rjRUxxMUMDKhipGxnEZgipgIhlR8GmDGlGyBNrNSbGBK7hxi5c6pRJKRLUVDW4coWcZuSRtnP-x3rgzqEawbF5k-wFEWARPeWCVcnq1EEGgJ6xEUcW7R2o-mHgwvSUYYgrI2mbgdFq7-oAi4Kqrc9P2XA&CMCD=mtp%3D64800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22288090c7-b539-477b-932a-ad8874daa0c9%22" \
+                -i "$WWL_STREAM_URL" \
                 -t 00:45:00 -c copy "wwl.mp4"
               ;;
             *)
