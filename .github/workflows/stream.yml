@@ -48,10 +48,16 @@ jobs:
             *) echo "❌ invalid stream selection: $TARGET" && exit 1 ;;
           esac
 
+          if [ -z "$STREAM_URL" ]; then
+            echo "❌ STREAM_URL is empty. Check your secret or input."
+            exit 1
+          fi
+
+          echo "🔍 Using stream URL: $STREAM_URL"
           OUTPUT="${TARGET}.mp4"
           echo "📡 recording $TARGET stream for 45m..."
           ffmpeg -nostdin \
-            -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
+            -headers "user-agent: Mozilla/5.0\r\naccept: */*\r\nreferer: https://www.wvue.com\r\norigin: https://www.wvue.com" \
             -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
             -fflags +genpts -timeout 3000000 \
             -i "$STREAM_URL" \
