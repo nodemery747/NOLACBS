@@ -1,4 +1,4 @@
-name: stream ritual – wvue or wwl
+name: stream ritual – wvue, wwl, or misc
 
 on:
   workflow_dispatch:
@@ -10,11 +10,12 @@ on:
         options:
           - wvue
           - wwl
+          - misc
 
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # ⏱️ full 6-hour buffer
+    timeout-minutes: 360
 
     steps:
       - name: install ffmpeg
@@ -25,45 +26,26 @@ jobs:
           TARGET: ${{ github.event.inputs.target }}
           WVUE_STREAM_URL: ${{ secrets.WVUE_STREAM_URL }}
           WWL_STREAM_URL: ${{ secrets.WWL_STREAM_URL }}
+          MISC_STREAM_URL: ""
         run: |
           echo "🎙️ invoking stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
-          case "$TARGET" in
-            wvue)
-              echo "📡 recording wvue stream for 45m..."
-              ffmpeg -nostdin \
-                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
-                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-                -fflags +genpts -timeout 3000000 \
-                -i "$WVUE_STREAM_URL" \
-                -t 00:45:00 -c copy "wvue.mp4"
-              ;;
-            wwl)
-              echo "📡 recording wwl stream for 45m..."
-              ffmpeg -nostdin \
-                -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
-                -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
-                -fflags +genpts -timeout 3000000 \
-                -i "$WWL_STREAM_URL" \
-                -t 00:45:00 -c copy "wwl.mp4"
-              ;;
-            *)
-              echo "❌ invalid stream selection: $TARGET"
-              exit 1
-              ;;
-          esac
+          STREAM_URL_VAR="${TARGET^^}_STREAM_URL"
+          STREAM_URL="${!STREAM_URL_VAR}"
+          OUTPUT="${TARGET}.mp4"
+
+          echo "📡 recording $TARGET stream for 45m..."
+          ffmpeg -nostdin \
+            -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
+            -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
+            -fflags +genpts -timeout 3000000 \
+            -i "$STREAM_URL" \
+            -t 00:45:00 -c copy "$OUTPUT"
+
           echo "✅ stream ritual complete for $TARGET at $(date)"
 
-      - name: upload wvue artifact
-        if: github.event.inputs.target == 'wvue'
+      - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wvue_${{ github.run_id }}
-          path: wvue.mp4
-
-      - name: upload wwl artifact
-        if: github.event.inputs.target == 'wwl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: wwl_${{ github.run_id }}
-          path: wwl.mp4
+          name: ${{ github.event.inputs.target }}_${{ github.run_id }}
+          path: ${{ github.event.inputs.target }}.mp4
