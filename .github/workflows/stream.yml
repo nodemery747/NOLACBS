@@ -11,6 +11,10 @@ on:
           - wvue
           - wwl
           - misc
+      misc_url:
+        description: "if target is misc, paste full stream URL here"
+        required: false
+        type: string
 
 jobs:
   record:
@@ -24,9 +28,9 @@ jobs:
       - name: record selected stream
         env:
           TARGET: ${{ github.event.inputs.target }}
+          MISC_URL: ${{ github.event.inputs.misc_url }}
           WVUE_STREAM_URL: ${{ secrets.WVUE_STREAM_URL }}
           WWL_STREAM_URL: ${{ secrets.WWL_STREAM_URL }}
-          MISC_STREAM_URL: "https://cbsplaylistserver.aws.syncbak.com/mpl/20160401/13665785/5743360/media.m3u8?request_token=AeZRmd4Jm8v6cGfWVEmydL2ThOe1CHMqVnAvToLl_cZhWpCS1dkQeT7emXnW0c3o7QHl5l5srMN-4jfywj3MAwe9kRjjZukoF-bBm9JFABW-pFU-0dCjlxBHWlXN3OH9JRQ-oYxvpWHmfjcmjwhkaHApqSxi62BPY3NRuUNQIn2PpjL4vEx-3aW6QaAqeKh5&CMCD=mtp%3D44800%2Cot%3Dm%2Csf%3Dh%2Csid%3D%221df7c4c7-3583-454d-91a5-5c1408b3ea2c%22"
         run: |
           echo "🎙️ invoking stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
@@ -34,7 +38,13 @@ jobs:
           case "$TARGET" in
             wvue) STREAM_URL="$WVUE_STREAM_URL" ;;
             wwl)  STREAM_URL="$WWL_STREAM_URL" ;;
-            misc) STREAM_URL="$MISC_STREAM_URL" ;;
+            misc)
+              if [ -z "$MISC_URL" ]; then
+                echo "❌ misc_url input is required when target is misc"
+                exit 1
+              fi
+              STREAM_URL="$MISC_URL"
+              ;;
             *) echo "❌ invalid stream selection: $TARGET" && exit 1 ;;
           esac
 
