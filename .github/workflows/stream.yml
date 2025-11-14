@@ -25,14 +25,13 @@ jobs:
       - name: install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: record selected stream
+      - name: record stream
         env:
           TARGET: ${{ github.event.inputs.target }}
           MISC_URL: ${{ github.event.inputs.misc_url }}
           WVUE_STREAM_URL: ${{ secrets.WVUE_STREAM_URL }}
           WWL_STREAM_URL: ${{ secrets.WWL_STREAM_URL }}
         run: |
-          echo "🎙️ invoking stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
 
           case "$TARGET" in
@@ -40,30 +39,19 @@ jobs:
             wwl)  STREAM_URL="$WWL_STREAM_URL" ;;
             misc)
               if [ -z "$MISC_URL" ]; then
-                echo "❌ misc_url input is required when target is misc"
                 exit 1
               fi
               STREAM_URL="$MISC_URL"
               ;;
-            *) echo "❌ invalid stream selection: $TARGET" && exit 1 ;;
+            *) exit 1 ;;
           esac
 
-          if [ -z "$STREAM_URL" ]; then
-            echo "❌ STREAM_URL is empty. Check your secret or input."
-            exit 1
-          fi
-
-          echo "🔍 Using stream URL: $STREAM_URL"
-          OUTPUT="${TARGET}.mp4"
-          echo "📡 recording $TARGET stream for 45m..."
           ffmpeg -nostdin \
             -headers "user-agent: Mozilla/5.0\r\naccept: */*\r\nreferer: https://www.wvue.com\r\norigin: https://www.wvue.com" \
             -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
             -fflags +genpts -timeout 3000000 \
             -i "$STREAM_URL" \
-            -t 00:45:00 -c copy "$OUTPUT"
-
-          echo "✅ stream ritual complete for $TARGET at $(date)"
+            -t 00:45:00 -c copy "${TARGET}.mp4"
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
