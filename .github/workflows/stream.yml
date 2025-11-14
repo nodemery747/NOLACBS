@@ -26,14 +26,28 @@ jobs:
           TARGET: ${{ github.event.inputs.target }}
           WVUE_STREAM_URL: ${{ secrets.WVUE_STREAM_URL }}
           WWL_STREAM_URL: ${{ secrets.WWL_STREAM_URL }}
-          MISC_STREAM_URL: ""
+          MISC_STREAM_URL: "https://INSERT-YOUR-MISC-URL-HERE"
         run: |
           echo "🎙️ invoking stream ritual for $TARGET at $(date)"
           TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]' | xargs)
-          STREAM_URL_VAR="${TARGET^^}_STREAM_URL"
-          STREAM_URL="${!STREAM_URL_VAR}"
-          OUTPUT="${TARGET}.mp4"
 
+          case "$TARGET" in
+            wvue)
+              STREAM_URL="$WVUE_STREAM_URL"
+              ;;
+            wwl)
+              STREAM_URL="$WWL_STREAM_URL"
+              ;;
+            misc)
+              STREAM_URL="$MISC_STREAM_URL"
+              ;;
+            *)
+              echo "❌ invalid stream selection: $TARGET"
+              exit 1
+              ;;
+          esac
+
+          OUTPUT="${TARGET}.mp4"
           echo "📡 recording $TARGET stream for 45m..."
           ffmpeg -nostdin \
             -headers "user-agent: vlc/3.0.11\r\naccept: */*\r\nconnection: keep-alive" \
