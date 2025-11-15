@@ -19,7 +19,7 @@ on:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 420
+    timeout-minutes: 360
 
     steps:
       - name: install ffmpeg
@@ -51,7 +51,7 @@ jobs:
             -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \
             -fflags +genpts -timeout 3000000 \
             -i "$STREAM_URL" \
-            -t 06:45:00 -c copy "${TARGET}.mp4"
+            -t 05:45:00 -c copy "${TARGET}.mp4"
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
